@@ -1,6 +1,6 @@
 pipeline {
     agent any
-
+    
     environment {
         AWS_ACCESS_KEY_ID     = credentials('AKIAXTHSTT3DRBVCILFV')
         AWS_SECRET_ACCESS_KEY = credentials('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')
@@ -12,6 +12,14 @@ pipeline {
     }
 
     stages {
+        stage('Print AWS CLI Configuration') {
+            steps {
+                script {
+                    sh 'aws configure list'
+                }
+            }
+        }
+
         stage('Terraform Init') {
             steps {
                 sh 'terraform init'
@@ -30,7 +38,7 @@ pipeline {
             }
         }
 
-        stage('Request approval to apply') {
+        stage('Request Approval to Apply') {
             steps {
                 timeout(activity: true, time: 5) {
                     input message: 'Need approval to apply', submitter: 'admin'
@@ -38,11 +46,10 @@ pipeline {
             }
         }
 
-        stage('Terraform Action') {
+        stage('Terraform Apply') {
             steps {
                 script {
-                    // Use double quotes to interpolate variables in the string
-                    sh "terraform ${action} -auto-approve"
+                    sh 'terraform apply -auto-approve'
                 }
             }
         }
