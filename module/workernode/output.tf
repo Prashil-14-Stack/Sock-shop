@@ -4,7 +4,3 @@ output "workernode_host" {
 output "workernode-id" {
   value = aws_instance.workernode.*.id
 }
-output "worker" {
-  value = aws_instance.workernode.ami
-  
-}
