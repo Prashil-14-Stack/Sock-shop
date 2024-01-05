@@ -1,57 +1,39 @@
-pipeline {
+pipeline{
     agent any
-    
     environment {
-        AWS_ACCESS_KEY_ID     = credentials('AKIAXTHSTT3DRBVCILFV')
-        AWS_SECRET_ACCESS_KEY = credentials('DYt0lx6f0oEKd0tLT/N5gka7srn9ObdsxcjqneEh')
+        AWS_ACCESS_KEY_ID     = credentials('your-aws-access-key-id')
+        AWS_SECRET_ACCESS_KEY = credentials('your-aws-secret-access-key')
         AWS_DEFAULT_REGION    = 'eu-west-1'
-    }
-
-    tools {
+      tools {
         terraform 'terraform'
     }
-
-    stages {
-        stage('AWS CLI Configuration') {
-            steps {
-                script {
-                    sh "aws configure set aws_access_key_id ${AWS_ACCESS_KEY_ID}"
-                    sh "aws configure set aws_secret_access_key ${AWS_SECRET_ACCESS_KEY}"
-                    sh "aws configure set region ${AWS_DEFAULT_REGION}"
-                }
-            }
+    stages{ 
+      stage('terraform init'){
+        steps{
+          sh 'terraform init'
         }
-
-        stage('Terraform Init') {
-            steps {
-                sh 'terraform init'
-            }
+      }
+    stage('terraform fmt'){
+        steps{
+          sh 'terraform fmt'
         }
-
-        stage('Terraform Format') {
-            steps {
-                sh 'terraform fmt'
-            }
+      }
+    stage('terraform validate'){
+        steps{
+          sh 'terraform validate'
         }
-
-        stage('Terraform Validate') {
-            steps {
-                sh 'terraform validate'
-            }
+      }
+     stage('Request approval to apply'){
+        steps{
+          timeout(activity: true, time: 5){
+            input message: 'Need approval to apply', submitter: 'admin'
+          }
         }
-
-        stage('Request Approval to Apply') {
-            steps {
-                timeout(activity: true, time: 5) {
-                    input message: 'Need approval to apply', submitter: 'admin'
-                }
-            }
+      }
+    stage('terraform action'){
+        steps{
+          sh 'terraform ${action} -auto-approve'
         }
-
-        stage('Terraform Apply') {
-            steps {
-                sh 'terraform apply -auto-approve'
-            }
-        }
+      }
     }
 }
