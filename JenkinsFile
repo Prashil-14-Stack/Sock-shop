@@ -19,11 +19,6 @@ pipeline{
           sh 'terraform validate'
         }
       }
-    stage('terraform plan'){
-        steps{
-          sh 'terraform plan'
-        }
-      }
      stage('Request approval to apply'){
         steps{
           timeout(activity: true, time: 5){
